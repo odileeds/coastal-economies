@@ -774,12 +774,13 @@ ready(function(){
 			if(!state.basemap) state.basemap = this.view.basemap;
 			
 			
-			el = document.getElementById('scalebar')
+			el = document.getElementById('scalebar');
+			console.log(el);
 			if(!el){
 				el = document.createElement('div');
 				el.id = "scalebar";
 				el.classList.add('key');
-				document.getElementsByClassName('selectors')[0].append(el);
+				document.getElementById('app').append(el);
 			}
 			el.innerHTML = '<div class="bar" style="background:linear-gradient(to right,'+Colour.getColourScale(state.scale)+');"></div><div class="range"><span class="min">'+ranges[state.key].min+'</span><span class="max">'+ranges[state.key].max+'</span></div>';
 			
