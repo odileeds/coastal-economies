@@ -1,6 +1,8 @@
 # Understanding Coastal Economies
 
-This is part of a collaborative project between [ODI Leeds and UK Major Ports Group on coastal economies](https://odileeds.org/projects/coastal-economies/). The default view shows income quintiles within countries for coastal small areas. Tom Forth has written about [how the data were collected and how the coast was defined](https://odileeds.org/blog/2020-08-18-is-the-uk-coast-poor-). Tom mentions the following issues:
+This is part of a collaborative project between [ODI Leeds and UK Major Ports Group on coastal economies](https://odileeds.org/projects/coastal-economies/). As part of this project [Tom Forth](https://www.tomforth.co.uk/coastaleconomies/) has been asking __"Is the UK coast poor?"__. The question is imprecise and introduction of precision is controversial.
+
+The first problem is how to define __coast__. Then there is the problem of how to define __poor__ for small areas across different countries. Tom has written about [how the data were collected and how the coast was defined](https://odileeds.org/blog/2020-08-18-is-the-uk-coast-poor-). Tom mentions the following issues:
 
   * Income for small areas is measured and reported differently in different countries and thus can't be compared. For example Northern Ireland only publishes income deprivation rankings for its SOAs, Ireland only publishes median income, while England and Wales only publish equivalised mean income.
   * Small areas vary significantly in size and population, both across countries and within countries.
