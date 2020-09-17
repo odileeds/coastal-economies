@@ -697,15 +697,22 @@ ready(function(){
 				'OSMID':{'hide':true}
 			},
 			'colorFeatures': function(){
-				this.eachLayer(function(featureLayer) {
-					featureLayer.eachLayer(function(feature){
-						sty = {'fillColor':featureColours[feature.feature.properties.id]};
-						if(app.view.zoom <= 8){ sty.opacity = 0; sty.fillOpacity = 0; }
-						if(app.view.zoom == 9){ sty.opacity = 0.3; sty.fillOpacity = 0.3; }
-						if(app.view.zoom >= 10){ sty.opacity = 0.5; sty.fillOpacity = 0.5; }
-						feature.setStyle(sty);
+				if(app.view.zoom >= 9){
+					// Show polygons on the map at zoom level 9 or higher
+					app.map.addLayer(this);
+					this.eachLayer(function(featureLayer) {
+						featureLayer.eachLayer(function(feature){
+							sty = {'fillColor':featureColours[feature.feature.properties.id]};
+							//if(app.view.zoom <= 8){ sty.opacity = 0; sty.fillOpacity = 0; }
+							if(app.view.zoom == 9){ sty.opacity = 0.3; sty.fillOpacity = 0.3; }
+							if(app.view.zoom >= 10){ sty.opacity = 0.5; sty.fillOpacity = 0.5; }
+							feature.setStyle(sty);
+						});
 					});
-				});
+				}else{
+					// Don't show polygons on the map at zoom 8 or lower
+					app.map.removeLayer(this);
+				}
 			},
 			'zoom': 10,
 			'popup': function(mark){
