@@ -163,6 +163,7 @@
 			if(promises.length > 0){
 				promises.map(p => p.catch(e => e));
 				Promise.all(promises).then(responses => {
+					/*
 					var newstr,newest,id,d;
 					newest = new Date('2000-01-01T00:00Z');
 					newstr = '';
@@ -173,7 +174,7 @@
 						}
 					}
 					this.map.attributionControl.setPrefix("Data updated: "+newstr);
-
+					*/
 					this.buildGeoJSON(options);
 
 					// Trigger any callback
@@ -282,7 +283,7 @@
 			this.events = {};
 			this.layers = {};
 
-			this.map.attributionControl.setPrefix('Map').setPosition('bottomleft');
+			this.map.attributionControl.setPrefix('Data: <a href="https://odileeds.org/projects/coastal-economies/">ODI Leeds</a>').setPosition('bottomleft');
 
 
 			// Create a map label pane so labels can sit above polygons
