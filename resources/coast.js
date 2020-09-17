@@ -805,7 +805,7 @@ ready(function(){
 				el.classList.add('key');
 				document.getElementsByClassName('selectors')[0].append(el);
 			}
-			el.innerHTML = '<div class="bar" style="background:linear-gradient(to right,'+Colour.getColourScale(state.scale)+');"></div><div class="range"><span class="min">0</span><span class="max">'+ranges[state.key].max+'</span></div>';
+			el.innerHTML = '<div class="bar" style="background:linear-gradient(to right,'+Colour.getColourScale(state.scale)+');"></div><div class="range"><span class="min">'+ranges[state.key].min+'</span><span class="max">'+ranges[state.key].max+'</span></div>';
 			
 			if(updateData) makeCoast();
 
