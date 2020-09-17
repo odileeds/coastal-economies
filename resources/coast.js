@@ -798,7 +798,15 @@ ready(function(){
 			if(!state.basemap) state.basemap = this.view.basemap;
 			
 			
-			//console.log('updateView',state,[this.view.lat,this.view.lon]);
+			el = document.getElementById('scalebar')
+			if(!el){
+				el = document.createElement('div');
+				el.id = "scalebar";
+				el.classList.add('key');
+				document.getElementsByClassName('selectors')[0].append(el);
+			}
+			el.innerHTML = '<div class="bar" style="background:linear-gradient(to right,'+Colour.getColourScale(state.scale)+');"></div><div class="range"><span class="min">0</span><span class="max">'+ranges[state.key].max+'</span></div>';
+			
 			if(updateData) makeCoast();
 
 			if(state.lat!=this.view.lat || state.lon!=this.view.lon || state.zoom!=this.view.zoom){
