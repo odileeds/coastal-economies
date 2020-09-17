@@ -775,7 +775,6 @@ ready(function(){
 			
 			
 			el = document.getElementById('scalebar');
-			console.log(el);
 			if(!el){
 				el = document.createElement('div');
 				el.id = "scalebar";
