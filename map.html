@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="utf-8" />
+	<title>Coastal Economies</title>
+	<link rel="StyleSheet" href="resources/leaflet.css" type="text/css" />
+	<!--
+	<link rel="StyleSheet" href="resources/MarkerCluster.css" type="text/css" />
+	<link rel="StyleSheet" href="resources/MarkerCluster.default.css" type="text/css" />
+	-->
+	<link rel="StyleSheet" href="resources/style.css" type="text/css" />
+	<script type="text/javascript" src="resources/leaflet.js"></script>
+	<!--<script type="text/javascript" src="resources/leaflet.markercluster.js"></script>-->
+	<script type="text/javascript" src="resources/coast.js"></script>
+</head>
+<body class="b6-bg">
+
+	<div id="app">
+		<div class="selectors">
+			<div class="row">
+				<label for="basemap">Base map</label>
+				<select id="basemap">
+					<option value="greyscale" selected>Greyscale</option>
+					<option value="osm">Open Street Map</option>
+					<option value="cartodb-nolabel">CartoDB Voyager (no labels)</option>
+					<option value="cartodb">CartoDB Voyager</option>
+					<option value="cartodb-dark">CartoDB Dark</option>
+					<option value="esri">ESRI World Imagery</option>
+				</select>
+			</div>
+			<div class="row">
+				<label for="layers">Attribute</label>
+				<select id="layers">
+					<option value="income_mean" selected>Income (mean)</option>
+					<option value="income_mdn">Income (median)</option>
+					<option value="income_rtn">Income (rtn)</option>
+					<option value="incquintile">Income (quintile)</option>
+				</select>
+			</div>
+			<div class="row">
+				<label for="scales">Colour scale</label>
+				<select id="scales">
+					<option value="Heat">Heat</option>
+					<option value="Leodis">Leodis</option>
+					<option value="ODI">ODI</option>
+					<option value="Plasma">Plasma</option>
+					<option value="Viridis" selected>Viridis</option>
+				</select>
+			</div>
+		</div>
+		<div id="map"></div>
+	</div>
+
+</body>
+</html>
