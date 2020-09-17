@@ -15,7 +15,7 @@
 		if(options.baseMaps) baseMaps = options.baseMaps;
 		else{
 			// Default maps
-			baseMaps['greyscale'] = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
+			baseMaps['greyscale'] = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
 				attribution: 'Tiles: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
 				subdomains: 'abcd',
 				maxZoom: 19
@@ -24,17 +24,12 @@
 				maxZoom: 19,
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			});
-			baseMaps['cartodb'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+			baseMaps['cartodb'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
 				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
 				subdomains: 'abcd',
 				maxZoom: 19
 			});
-			baseMaps['cartodb-nolabel'] = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-				subdomains: 'abcd',
-				maxZoom: 19
-			});
-			baseMaps['cartodb-dark'] = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+			baseMaps['cartodb-dark'] = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png', {
 				attribution: 'Tiles: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
 				subdomains: 'abcd',
 				maxZoom: 19
@@ -113,38 +108,7 @@
 				_obj.layers[a].nodegetter.tiles[tileid].lastupdate = update;
 
 				_obj.log.message('Got results from geojson',json.features.length);
-/*
-				for(i = 0; i < json.features.length; i++){
-					el = json.features[i];
-					id = "";
-					if(typeof el.properties.osm_id==="string"){
-						id = 'OSM-'+el.properties.osm_id;
-						el.properties.OSMID = el.properties.osm_id;
-					}
-					if(typeof el.properties.id==="string") id = el.properties.id;
-					if(typeof _obj.layers[a].options.id==="string") id = el.properties[_obj.layers[a].options.id];
 
-					_obj.layers[a].nodegetter.tiles[tileid].id.push(id);
-
-					// If we don't have this node we build a basic structure for it
-					if(!_obj.layers[a].nodes[id]){
-						_obj.layers[a].nodes[id] = {'id':id,'props':{},'popup':'','changedtags':[],'lastupdate':update};
-					}
-
-					// Add the properties
-					for(p in el.properties){
-						if(p == "tag"){
-							for(t in el.properties.tag){
-								_obj.layers[a].nodes[id].props[t] = el.properties.tag[t]||"";
-							}
-						}else{
-							if(p != "osm_id"){
-								_obj.layers[a].nodes[id].props[p] = el.properties[p];
-							}
-						}
-					}
-				}
-				*/
 			}).catch(error => {
 				_obj.log.error('Failed to load '+url);
 				_obj.layers[a].nodegetter.tiles[tileid].data = {};
@@ -319,6 +283,17 @@
 			this.layers = {};
 
 			this.map.attributionControl.setPrefix('Map').setPosition('bottomleft');
+
+
+			// Create a map label pane so labels can sit above polygons
+			this.map.createPane('labels');
+			this.map.getPane('labels').style.zIndex = 650;
+			this.map.getPane('labels').style.pointerEvents = 'none';
+
+			L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png', {
+				attribution: '',
+				pane: 'labels'
+			}).addTo(this.map);
 
 			if(this.show.zoom){
 				// Add zoom control with options
