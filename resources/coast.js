@@ -993,6 +993,7 @@ ready(function(){
 				
 	}
 
+/*
 	// Get country boundaries
 	fetch('data/UKMPG-WB-boundaries.geojson',{'method':'GET'})
 	.then(response => {
@@ -1014,7 +1015,7 @@ ready(function(){
 	}).catch(error => {
 		console.error('Failed to load data');
 	});
-
+*/
 
 	
 	
