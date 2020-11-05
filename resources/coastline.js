@@ -135,7 +135,7 @@
 					var r,c,k,v,data,n;
 					
 					// Parse the CSV (trimming extra newlines at the end)
-					d = CSVToArray(d.replace(/[\n\r]{1,*}$/g,""));
+					d = CSVToArray(d.replace(/[\n\r]{1,}$/g,""));
 
 					// Build an array of objects - one for each row in the data
 					data = new Array(d.length-1);
