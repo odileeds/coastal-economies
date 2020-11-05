@@ -118,7 +118,7 @@
 			this.svg = document.createElementNS(ns,'svg');
 			this.svg.setAttribute('transform','scale(1,-1)');
 			if(this.defaults.shape) this.svg.classList.add('shape');
-			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; fill: white; transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;}svg.shape rect { height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
+			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;}svg.shape rect { height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
 			this.el.appendChild(this.svg);
 			
@@ -212,6 +212,7 @@
 				len = Math.sqrt(Math.pow((xy[i].start.x - xy[i].end.x),2) + Math.pow((xy[i].start.y - xy[i].end.y),2));
 				ang = Math.atan2((xy[i].end.y - xy[i].start.y),(xy[i].end.x - xy[i].start.x))*180/Math.PI;
 				xy[i].len = len;
+				
 if(isNaN(len)) console.log(i,this.data[id][i]);
 
 				if(!this.data[id][i]._el){
