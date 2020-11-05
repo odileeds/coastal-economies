@@ -207,6 +207,11 @@
 								'color':'rgba(0,0,0,0.2)',
 								'weight': 1
 							}
+						}).bindPopup(function(layer){
+							var key = app.inputs.key.value;
+							console.log('bindPopup',key,layer.feature,_obj.layers[lid].options);
+							if(typeof _obj.layers[lid].options.popup==="function") return _obj.layers[lid].options.popup.call(_obj.layers[lid].options.this||{},layer.feature,key);
+							else return '<strong>'+layer.feature.properties.id+'</strong>: ';//+layer.feature.properties[key]+'';
 						});
 
 					}
@@ -488,8 +493,8 @@
 
 
 
-	/* ============ */
-	/* Colours v0.3 */
+	/* ============== */
+	/* Colours v0.3.1 */
 	// Define colour routines
 	function Colour(c,n){
 		if(!c) return {};
@@ -637,7 +642,6 @@
 			if(typeof max!=="number") max = 1;
 			cs = scales[s].stops;
 			v2 = 100*(v-min)/(max-min);
-			
 			var match = -1;
 			if(v==max){
 				colour = 'rgba('+cs[cs.length-1].c.rgb[0]+', '+cs[cs.length-1].c.rgb[1]+', '+cs[cs.length-1].c.rgb[2]+', ' + cs[cs.length-1].c.alpha + ")";
@@ -648,7 +652,7 @@
 						if(v2 >= cs[c].v && v2 <= cs[c+1].v){
 							// On this colour stop
 							pc = 100*(v2 - cs[c].v)/(cs[c+1].v-cs[c].v);
-							if(v2 >= max) pc = 100;	// Don't go above colour range
+							if(pc > 100) pc = 100;	// Don't go above colour range
 							colour = this.getColourPercent(pc,cs[c].c,cs[c+1].c);
 							continue;
 						}
@@ -702,6 +706,7 @@ ready(function(){
 					app.map.addLayer(this);
 					this.eachLayer(function(featureLayer) {
 						featureLayer.eachLayer(function(feature){
+							console.log(feature.feature.properties,ranges);
 							sty = {'fillColor':featureColours[feature.feature.properties.id]};
 							//if(app.view.zoom <= 8){ sty.opacity = 0; sty.fillOpacity = 0; }
 							if(app.view.zoom == 9){ sty.opacity = 0.3; sty.fillOpacity = 0.3; }
@@ -715,7 +720,8 @@ ready(function(){
 				}
 			},
 			'zoom': 10,
-			'popup': function(mark){
+			'popup': function(mark,key){
+				console.log('here',mark,key);
 				var str,cls,title,types,p,i,ts,ul,label;
 				ul = '';
 				str = '';
@@ -724,29 +730,6 @@ ready(function(){
 				title = 'Bin';
 				types = {};
 				ts = 0;
-				if(mark.props.amenity){
-					if(mark.props.amenity=="waste_basket"){
-						title = "Waste";
-						cls = "waste";
-						ico = "waste";
-					}else{
-						for(t in mark.props){
-							if(t.indexOf("recycling:")==0){
-								types[t] = mark.props[t];
-							}
-						}
-						ts = Object.keys(types).length;
-						title = "Recycling";
-						cls = "recycling";
-						ico = "recycling";
-						// If only one type of recycling pick that bin
-						if(ts==1){
-							if(types['recycling:beverage_cartons']){ ico = "beverage"; cls += ' beverage'; }
-							if(types['recycling:paper']){ ico = "paper"; cls += " paper"; }
-							if(types['recycling:glass_bottles']){ ico = "glass"; cls += ' glass'; }
-						}
-					}
-				}
 				i = 0;
 				propertylookup = (this.layers[this.selectedLayer].options.propertylookup||{}); 
 				for(p in mark.props){
@@ -824,7 +807,6 @@ ready(function(){
 				if(_interactive){
 					if(inp){
 						state[inp] = _obj.inputs[inp].value;
-						console.info('change',inp,state);
 						// Either update basemap or the view
 						_obj.updateView(state,true);
 					}else{
