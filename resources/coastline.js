@@ -212,6 +212,7 @@
 				len = Math.sqrt(Math.pow((xy[i].start.x - xy[i].end.x),2) + Math.pow((xy[i].start.y - xy[i].end.y),2));
 				ang = Math.atan2((xy[i].end.y - xy[i].start.y),(xy[i].end.x - xy[i].start.x))*180/Math.PI;
 				xy[i].len = len;
+if(isNaN(len)) console.log(i,this.data[id][i]);
 
 				if(!this.data[id][i]._el){
 					this.data[id][i]._el = document.createElementNS(ns,"rect");
