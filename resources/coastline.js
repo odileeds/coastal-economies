@@ -217,9 +217,8 @@ if(isNaN(len)) console.log(i,this.data[id][i]);
 				if(!this.data[id][i]._el){
 					this.data[id][i]._el = document.createElementNS(ns,"rect");
 					this.svg.appendChild(this.data[id][i]._el);
-					txt = document.createElementNS(ns,"title");
-					txt.innerHTML = this.data[id][i].nearestid;
-					this.data[id][i]._el.appendChild(txt);
+					this.data[id][i]._txt = document.createElementNS(ns,"title");
+					this.data[id][i]._el.appendChild(this.data[id][i]._txt);
 				}
 
 				xy[i].colour = ODI.Colour.getColourFromScale(this.defaults.scale,this.data[id][i][this.defaults.key],r[this.defaults.key].min,r[this.defaults.key].max);
@@ -228,7 +227,7 @@ if(isNaN(len)) console.log(i,this.data[id][i]);
 				dx = xy[i].start.x - x;
 				dy = xy[i].start.y - y;
 
-				tall = (vb.h - pad*2) * (this.data[id][i][this.defaults.key] - r[this.defaults.key].min)/(r[this.defaults.key].max - r[this.defaults.key].min);
+				tall = (vb.h - pad*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
 
 				this.data[id][i]._el.setAttribute('width',len.toFixed(2));
 				this.data[id][i]._el.setAttribute('height',tall);
@@ -239,6 +238,7 @@ if(isNaN(len)) console.log(i,this.data[id][i]);
 				this.data[id][i]._el.setAttribute('stroke-width',8);
 				this.data[id][i]._el.setAttribute('stroke-linecap','round');
 				
+				this.data[id][i]._txt.innerHTML = this.data[id][i].nearestid+': '+this.data[id][i][this.defaults.key];
 
 				x += len + xsep;
 			}
