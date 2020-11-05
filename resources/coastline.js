@@ -548,8 +548,6 @@ ready(function(){
 			_obj.updateSVG();
 		});
 		return this;
-	})
-	
-	console.log(app);
+	});
 
 });
