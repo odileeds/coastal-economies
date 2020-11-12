@@ -388,7 +388,7 @@
 				// Match any points-of-interest and store their x/y values
 				for(p = 0; p < this.poi[id].length; p++){
 					for(s = 0; s < this.poi[id][p].segments.length; s++){
-						if(this.data[id][i].nearestid == this.poi[id][p].segments[s]){
+						if(this.data[id][i].nearestid == this.poi[id][p].segments[s] && !this.poi[id][p]._p){
 							this.poi[id][p]._p = {'x':x,'y':y};
 						}
 					}
