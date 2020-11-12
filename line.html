@@ -7,10 +7,13 @@
 	<link rel="StyleSheet" href="resources/style.css" type="text/css" />
 	<script type="text/javascript" src="resources/coastline.js"></script>
 	<style>
-	#map {
-		background: #222;
+	#coastline {
+		position: relative;
 		overflow-y: hidden;
 		overflow-x: scroll;
+		height: 100%;
+		min-height: 400px;
+		height: 90vh;
 	}
 	/* The switch - the box around the slider */
 	.switch {
@@ -67,12 +70,50 @@
 		transform: translate3d(0,-50%,0);
 		white-space: nowrap;
 	}
+	#tooltip { background: black; color: white; padding: 0.25em 0.5em; margin-left: 0.75em; transition: left 0.1s ease-in, top 0.1s ease-in; }
+	#tooltip::after {
+		content: '';
+		position: absolute;
+		bottom: auto;
+		width: 0;
+		height: 0;
+		border: 0.5em solid transparent;
+		left: 0%;
+		top: 50%;
+		transform: translate3d(-100%,-50%,0);
+		border-color: transparent;
+		border-right-color: black;
+	}
+	#main {
+		position: relative;
+		padding-top: 2em;
+		padding-bottom: 2em;
+	}
+	#coastline::after {
+		content: "";
+		clear: both;
+	}
+	h1 { line-height: 1em; }
+	footer > div.holder { padding-bottom: 3em; }
+	.selector {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		grid-gap: 1em;
+	}
+	.row { text-align: center; }
+	html, body, #main { height: auto; }
 	</style>
 </head>
 <body class="b6-bg">
 
-	<div id="app">
-		<div class="selectors">
+	<header class="b1-bg">
+		<div class="padded holder">
+			<h1>Coastal Economies on a line</h1>
+		</div>
+	</header>
+	<div id="main" class="padded holder">
+		<p>This is part of a <a href="https://odileeds.org/projects/coastal-economies/">collaborative project between ODI Leeds and UK Major Ports Group</a> on coastal economies. After <a href="https://odileeds.github.io/coastal-economies/">defining the coast</a>, and segmenting it, we calculated the mean income quintile for each coastal segment. The results are shown below on a segmented-coast view but you can also switch to a view that presents the the coastline as a linear barchart.</p>
+		<div class="selector">
 			<div class="row">
 				<label for="country">Country</label>
 				<select id="country">
@@ -98,13 +139,17 @@
 			<label class="switch" for="shaper">
 			  <input type="checkbox" id="shaper" checked="checked">
 			  <span class="slider"></span>
-			  <span>Toggle line/shape</span>
+			  <span>Toggle map/chart</span>
 			</label>
-
-			<p><a href="https://odileeds.github.io/coastal-economies/">Notes on interpreting the map</a>.</p>
 		</div>
-		<div id="map"></div>
+		<div id="coastline"></div>
 	</div>
+	
+	<footer class="b2-bg">
+		<div class="holder padded">
+			<p>Visualisation &copy; ODI Leeds 2020
+		</div>
+	</footer>
 
 </body>
 </html>

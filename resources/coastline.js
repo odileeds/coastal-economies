@@ -106,25 +106,67 @@
 		if(!options) options = {};
 		this.opt = options;
 		this.log = new Logger({'id':'CoastLine','logging':options.logging});
-		this.el = document.getElementById(id)
+		this.el = document.getElementById(id);
 		if(!this.el){
 			this.log.error('No DOM element exists '+id);
 			delete this.el;
 			return this;
 		}
+		this.events = {};
 		var ns = 'http://www.w3.org/2000/svg';
 
 		this.init = function(fn){
 			this.svg = document.createElementNS(ns,'svg');
-			this.svg.setAttribute('transform','scale(1,-1)');
 			if(this.defaults.shape) this.svg.classList.add('shape');
-			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;}svg.shape rect { height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
+			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
 			this.el.appendChild(this.svg);
-			
+
+			// Now create a <g> to flip the coordinate system
+			this.group = document.createElementNS(ns,'g');
+			this.group.setAttribute('transform','translate(0,'+this.el.clientHeight+') scale(1,-1)');
+			this.svg.appendChild(this.group);
+			// Attach a hover event
+			var _obj = this;
+
 			if(typeof fn==="function") fn.call(this);
 			return this;
 		}
+
+
+		// Attach a handler to an event for the OSMEditor object in a style similar to that used by jQuery
+		//   .on(eventType[,eventData],handler(eventObject));
+		//   .on("authenticate",function(e){ console.log(e); });
+		//   .on("authenticate",{me:this},function(e){ console.log(e.data.me); });
+		this.on = function(ev,e,fn){
+			if(typeof ev!="string") return this;
+			if(typeof fn==="undefined"){
+				fn = e;
+				e = {};
+			}else{
+				e = {data:e}
+			}
+			if(typeof e!="object" || typeof fn!="function") return this;
+			if(this.events[ev]) this.events[ev].push({e:e,fn:fn});
+			else this.events[ev] = [{e:e,fn:fn}];
+			return this;
+		}
+
+		// Trigger a defined event with arguments. This is for internal-use to be 
+		// sure to include the correct arguments for a particular event
+		this.trigger = function(ev,args){
+			if(typeof ev != "string") return;
+			if(typeof args != "object") args = {};
+			var o = [];
+			if(typeof this.events[ev]=="object"){
+				for(var i = 0 ; i < this.events[ev].length ; i++){
+					var e = extendObject(this.events[ev][i].e,args);
+					if(typeof this.events[ev][i].fn == "function") o.push(this.events[ev][i].fn.call(e['this']||this,e))
+				}
+			}
+			if(o.length > 0) return o;
+		}
+
 		this.loadData = function(id,file){
 			this.defaults.id = id;
 			ODI.ajax(file,{
@@ -158,10 +200,54 @@
 			})
 			return this;
 		}
+		this.hideTooltip = function(){
+			console.log('hide');
+			this.tooltip = document.getElementById('tooltip');
+			if(this.tooltip){
+				this.tooltip.setAttribute('style','display:none;');
+			}
+			return this;
+		}
+		this.showTooltip = function(el){
+			// Find the properties of the element
+			var id = el.getAttribute('data-id');
+			var i = el.getAttribute('data-i');
+
+			// Get or create the tooltip element
+			this.tooltip = document.getElementById('tooltip');
+			if(!this.tooltip){
+				this.tooltip = document.createElement('div');
+				this.tooltip.setAttribute('id','tooltip');
+				this.tooltip.innerHTML = "fred";
+				this.svg.insertAdjacentElement('afterend', this.tooltip);
+				var _obj = this;
+				this.tooltip.addEventListener('mouseout',function(e){ _obj.hideTooltip(); });
+			}
+
+			// Set the contents
+			this.tooltip.innerHTML = (this.data[id][i]._tooltip || el.querySelector('title').innerHTML);
+
+			// Position the tooltip
+			var bb = el.getBoundingClientRect();	// Bounding box of SVG element
+			var bbo = this.el.getBoundingClientRect(); // Bounding box of SVG holder
+			this.tooltip.setAttribute('style','position:absolute;left:'+Math.round(bb.left + bb.width/2 - bbo.left)+'px;top:'+Math.round(bb.top + bb.height/2 - bbo.top)+'px;transform:translate3d(0,-50%,0);');
+
+			return this;
+		}
 		this.updateSVG = function(id){
+
 			if(!id) id = this.defaults.id;
+
 			var d,r,i,k,path,vb,xy,len,xsep,pad,x,y,ang,tall;
+
 			r = {'lat':{'min':1e100,'max':-1e100},'lon':{'min':1e100,'max':-1e100}};
+
+			if(!this.opt) this.opt = {};
+			if(!this.opt.x) this.opt.x = {};
+			if(!this.opt.y) this.opt.y = {};
+			if(!this.opt.x.padding) this.opt.x.padding = 28;
+			if(!this.opt.y.padding) this.opt.y.padding = 28;
+
 			for(i = 0; i < this.data[id].length; i++){
 				if(this.data[id][i].startlat){
 					r.lat.min = Math.min(r.lat.min,this.data[id][i].startlat,this.data[id][i].endlat);
@@ -180,32 +266,34 @@
 
 			vb = this.viewBox;
 			xy = new Array(this.data[id].length);
-			pad = 28;
+			var _obj = this; 
 			
 			function getXY(lat,lon){
 				var dlat = r.lat.max-r.lat.min;
 				var dlon = r.lon.max-r.lon.min;
 				var lonscale = Math.cos(lat*Math.PI/180);
-				var dh = vb.h - 2*pad;
-				var dw = vb.w - 2*pad;
+				var dh = vb.h - 2*_obj.opt.y.padding;
+				var dw = vb.w - 2*_obj.opt.x.padding;
 				var scale = Math.min(dh/dlat,dw/dlon);
 
 				var x = 0;
 				var y = 0;
-				x = pad + (lon - r.lon.min)*scale*lonscale;
-				y = pad + (lat - r.lat.min)*scale;
+				x = _obj.opt.x.padding + (lon - r.lon.min)*scale*lonscale;
+				y = _obj.opt.y.padding + (lat - r.lat.min)*scale;
 				return {'x':x,'y':y};
 			}
 			
 			if(!this.coast){
 				this.coast = document.createElementNS(ns,"path");
-				this.svg.appendChild(this.coast);
+				this.group.appendChild(this.coast);
 			}
 
 			len = 0;
-			x = pad;
-			y = pad;
+			x = this.opt.x.padding;
+			y = this.opt.y.padding;
 			xsep = (this.opt.x && this.opt.x.spacing ? this.opt.x.spacing : 0);
+
+			var _obj = this;
 
 			for(i = 0; i < this.data[id].length; i++){
 				xy[i] = {'start':getXY(this.data[id][i].startlat,this.data[id][i].startlon),'end':getXY(this.data[id][i].endlat,this.data[id][i].endlon)};
@@ -213,11 +301,13 @@
 				ang = Math.atan2((xy[i].end.y - xy[i].start.y),(xy[i].end.x - xy[i].start.x))*180/Math.PI;
 				xy[i].len = len;
 				
-if(isNaN(len)) console.log(i,this.data[id][i]);
-
 				if(!this.data[id][i]._el){
 					this.data[id][i]._el = document.createElementNS(ns,"rect");
-					this.svg.appendChild(this.data[id][i]._el);
+					// Attach a hover event
+					this.data[id][i]._el.addEventListener('mouseover',function(e){
+						_obj.showTooltip(e.currentTarget);
+					});
+					this.group.appendChild(this.data[id][i]._el);
 					this.data[id][i]._txt = document.createElementNS(ns,"title");
 					this.data[id][i]._el.appendChild(this.data[id][i]._txt);
 				}
@@ -228,7 +318,7 @@ if(isNaN(len)) console.log(i,this.data[id][i]);
 				dx = xy[i].start.x - x;
 				dy = xy[i].start.y - y;
 
-				tall = (vb.h - pad*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
+				tall = (vb.h - this.opt.y.padding*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
 
 				this.data[id][i]._el.setAttribute('width',len.toFixed(2));
 				this.data[id][i]._el.setAttribute('height',tall);
@@ -238,12 +328,15 @@ if(isNaN(len)) console.log(i,this.data[id][i]);
 				this.data[id][i]._el.setAttribute('fill',xy[i].colour);
 				this.data[id][i]._el.setAttribute('stroke-width',8);
 				this.data[id][i]._el.setAttribute('stroke-linecap','round');
+				this.data[id][i]._el.setAttribute('data-id',id);
+				this.data[id][i]._el.setAttribute('data-i',i);
 				
 				this.data[id][i]._txt.innerHTML = this.data[id][i].nearestid+': '+this.data[id][i][this.defaults.key];
+				this.data[id][i]._tooltip = this.data[id][i].nearestid+'<br />'+this.data[id][i][this.defaults.key]
 
 				x += len + xsep;
 			}
-			x += pad;
+			x += this.opt.x.padding;
 
 			this.setSize(x,vb.h);
 
@@ -527,7 +620,7 @@ var app;
 ready(function(){
 	
 
-	app = new ODI.CoastLine('map',{'x':{'spacing':0.5,'scale':0.5}});
+	app = new ODI.CoastLine('coastline',{'x':{'spacing':0.5,'scale':0.5}});
 	
 	app.inputs = { 'key': document.getElementById('layers'), 'scale': document.getElementById('scales'),'country': document.getElementById('country'), 'shape': document.getElementById('shaper') };
 	app.defaults = {'lat':52,'lon':-1,'zoom':4,'key':app.inputs.key.value,'scale':app.inputs.scale.value,'country':app.inputs.country.value,'shape':app.inputs.shape.checked};
@@ -541,12 +634,14 @@ ready(function(){
 		this.inputs.shape.addEventListener('change', function(e){
 			if(e.currentTarget.checked) _obj.svg.classList.add('shape');
 			else _obj.svg.classList.remove('shape');
+			_obj.hideTooltip();
 		});
 
 		this.inputs.scale.setAttribute('data',this.defaults.scale);
 		this.inputs.scale.addEventListener('change', function(e){
 			_obj.defaults.scale = e.currentTarget.value;
 			_obj.updateSVG();
+			_obj.hideTooltip();
 		});
 		return this;
 	});
