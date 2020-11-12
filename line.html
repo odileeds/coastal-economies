@@ -7,14 +7,6 @@
 	<link rel="StyleSheet" href="resources/style.css" type="text/css" />
 	<script type="text/javascript" src="resources/coastline.js"></script>
 	<style>
-	#coastline {
-		position: relative;
-		overflow-y: hidden;
-		overflow-x: scroll;
-		height: 100%;
-		min-height: 400px;
-		height: 90vh;
-	}
 	/* The switch - the box around the slider */
 	.switch {
 		position: relative;
@@ -42,7 +34,6 @@
 		-webkit-transition: .4s;
 		transition: .4s;
 	}
-
 	.slider:before {
 		position: absolute;
 		content: "";
@@ -70,6 +61,25 @@
 		transform: translate3d(0,-50%,0);
 		white-space: nowrap;
 	}
+	header h1 { line-height: 1em; }
+	#coastline {
+		position: relative;
+		overflow-y: hidden;
+		overflow-x: scroll;
+		height: 100%;
+		min-height: 400px;
+		height: 80vh;
+	}
+	#coastline::after {
+		content: "";
+		clear: both;
+	}
+	.selector {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		grid-gap: 1em;
+	}
+	.row { text-align: center; }
 	#tooltip { background: black; color: white; padding: 0.25em 0.5em; margin-left: 0.75em; transition: left 0.1s ease-in, top 0.1s ease-in; }
 	#tooltip::after {
 		content: '';
@@ -84,24 +94,8 @@
 		border-color: transparent;
 		border-right-color: black;
 	}
-	#main {
-		position: relative;
-		padding-top: 2em;
-		padding-bottom: 2em;
-	}
-	#coastline::after {
-		content: "";
-		clear: both;
-	}
-	h1 { line-height: 1em; }
+	footer { margin-top: 2em; }
 	footer > div.holder { padding-bottom: 3em; }
-	.selector {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		grid-gap: 1em;
-	}
-	.row { text-align: center; }
-	html, body, #main { height: auto; }
 	</style>
 </head>
 <body class="b6-bg">
@@ -111,7 +105,7 @@
 			<h1>Coastal Economies on a line</h1>
 		</div>
 	</header>
-	<div id="main" class="padded holder">
+	<div class="padded holder">
 		<p>This is part of a <a href="https://odileeds.org/projects/coastal-economies/">collaborative project between ODI Leeds and UK Major Ports Group</a> on coastal economies. After <a href="https://odileeds.github.io/coastal-economies/">defining the coast</a>, and segmenting it, we calculated the mean income quintile for each coastal segment. The results are shown below on a segmented-coast view but you can also switch to a view that presents the the coastline as a linear barchart.</p>
 		<div class="selector">
 			<div class="row">
@@ -142,9 +136,12 @@
 			  <span>Toggle map/chart</span>
 			</label>
 		</div>
+	</div>
+
+	<div class="padded holder">
 		<div id="coastline"></div>
 	</div>
-	
+
 	<footer class="b2-bg">
 		<div class="holder padded">
 			<p>Visualisation &copy; ODI Leeds 2020
