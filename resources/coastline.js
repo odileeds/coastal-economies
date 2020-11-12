@@ -126,7 +126,7 @@
 				}
 			}
 		}
-console.log(this.defaults)
+
 		var readyState = false;
 		var ns = 'http://www.w3.org/2000/svg';
 
@@ -140,7 +140,7 @@ console.log(this.defaults)
 		};
 
 		// Get points of interest before doing anything else
-		ODI.ajax("data/poi.csv",{
+		ODI.ajax((options.poi || "data/poi.csv"),{
 			"dataType": "text",
 			"this": this,
 			"success": function(d,attr){
@@ -175,7 +175,7 @@ console.log(this.defaults)
 		this.init = function(fn){
 			this.svg = document.createElementNS(ns,'svg');
 			if(this.defaults && this.defaults.shape) this.svg.classList.add('shape');
-			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
+			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
 			this.el.appendChild(this.svg);
 
@@ -254,11 +254,8 @@ console.log(this.defaults)
 			return this;
 		}
 		this.hideTooltip = function(){
-			console.log('hide');
 			this.tooltip = document.getElementById('tooltip');
-			if(this.tooltip){
-				this.tooltip.setAttribute('style','display:none;');
-			}
+			if(this.tooltip) this.tooltip.setAttribute('style','display:none;');
 			return this;
 		}
 		this.showTooltip = function(el){
@@ -341,6 +338,7 @@ console.log(this.defaults)
 				this.group.appendChild(this.coast);
 			}
 
+			d = "";
 			len = 0;
 			x = this.opt.x.padding;
 			y = this.opt.y.padding;
@@ -373,6 +371,8 @@ console.log(this.defaults)
 
 				tall = (vb.h - this.opt.y.padding*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
 
+				d += (i==0 ? 'M':' L')+xy[i].start.x.toFixed(2)+','+xy[i].start.y.toFixed(2);
+
 				this.data[id][i]._el.setAttribute('width',len.toFixed(2));
 				this.data[id][i]._el.setAttribute('height',tall);
 				this.data[id][i]._el.setAttribute('x',x.toFixed(2));
@@ -383,15 +383,63 @@ console.log(this.defaults)
 				this.data[id][i]._el.setAttribute('stroke-linecap','round');
 				this.data[id][i]._el.setAttribute('data-id',id);
 				this.data[id][i]._el.setAttribute('data-i',i);
+
+				// Match any points-of-interest and store their x/y values
+				for(p = 0; p < this.poi[id].length; p++){
+					for(s = 0; s < this.poi[id][p].segments.length; s++){
+						if(this.data[id][i].nearestid == this.poi[id][p].segments[s]){
+							this.poi[id][p]._p = {'x':x,'y':y};
+						}
+					}
+				}
 				
 				this.data[id][i]._txt.innerHTML = this.data[id][i].nearestid+': '+this.data[id][i][this.defaults.key];
 				this.data[id][i]._tooltip = this.data[id][i].nearestid+'<br />'+this.data[id][i][this.defaults.key]
 
 				x += len + xsep;
 			}
+			this.coast.setAttribute('d',d);
+			this.coast.setAttribute('class','coast');
 			x += this.opt.x.padding;
 
 			this.setSize(x,vb.h);
+
+			fs = 12;
+
+			// Add points of interest
+			for(i = 0; i < this.poi[id].length; i++){
+				p = getXY(this.poi[id][i].lat,this.poi[id][i].lon);
+				x = this.poi[id][i]._p.x;
+				y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
+				dx = p.x - x;
+				dy = p.y - y;
+
+				if(!this.poi[id][i]._el){
+					// Create a <g> containing a <circle>, <text> and <text> (background)
+					this.poi[id][i]._el = document.createElementNS(ns,"g");
+					this.poi[id][i]._el.classList.add('label');
+					this.poi[id][i]._circle = document.createElementNS(ns,"circle");
+					this.poi[id][i]._circle.setAttribute('r',4);
+					this.poi[id][i]._txt = document.createElementNS(ns,"text");
+					this.poi[id][i]._txt.innerHTML = this.poi[id][i].name;
+					this.poi[id][i]._txt.setAttribute('style','font-size:16px;font-family:Arial;font-weight:bold;stroke:white;stroke-width:5;');
+					this.poi[id][i]._txt2 = document.createElementNS(ns,"text");
+					this.poi[id][i]._txt2.innerHTML = this.poi[id][i].name;
+					this.poi[id][i]._txt2.setAttribute('style','font-size:16px;font-family:Arial;font-weight:bold;');
+					this.poi[id][i]._el.appendChild(this.poi[id][i]._circle);
+					this.poi[id][i]._el.appendChild(this.poi[id][i]._txt);
+					this.poi[id][i]._el.appendChild(this.poi[id][i]._txt2);
+					this.group.appendChild(this.poi[id][i]._el);
+				}
+				this.poi[id][i]._circle.setAttribute('cx',x.toFixed(2)+'px');
+				this.poi[id][i]._circle.setAttribute('cy',y.toFixed(2)+'px');
+				this.poi[id][i]._txt.setAttribute('x',((x + fs/2).toFixed(2))+'px');
+				this.poi[id][i]._txt.setAttribute('y',((y + fs/2).toFixed(2))+'px');
+				this.poi[id][i]._txt2.setAttribute('x',((x + fs/2).toFixed(2))+'px');
+				this.poi[id][i]._txt2.setAttribute('y',((y + fs/2).toFixed(2))+'px');
+				this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale(1,-1);');
+			}
+
 
 			return this;
 		}
@@ -664,36 +712,3 @@ console.log(this.defaults)
 	root.ODI.Colour = new Colours();
 
 })(window || this);
-
-var app;
-
-ODI.ready(function(){
-
-	app = new ODI.CoastLine('coastline',{
-		'x':{'spacing':0.5,'scale':0.5},
-		'inputs': { 'key': document.getElementById('layers'), 'scale': document.getElementById('scales'),'country': document.getElementById('country'), 'shape': document.getElementById('shaper') },
-		'defaults': {}
-	});
-
-	app.ready(function(){
-
-		this.loadData(this.defaults.country,this.inputs.country.options[this.inputs.country.selectedIndex].getAttribute('data-file'));
-
-		// Add event to shape/line toggle
-		var _obj = this;
-		this.inputs.shape.addEventListener('change', function(e){
-			if(e.currentTarget.checked) _obj.svg.classList.add('shape');
-			else _obj.svg.classList.remove('shape');
-			_obj.hideTooltip();
-		});
-
-		this.inputs.scale.setAttribute('data',this.defaults.scale);
-		this.inputs.scale.addEventListener('change', function(e){
-			_obj.defaults.scale = e.currentTarget.value;
-			_obj.updateSVG();
-			_obj.hideTooltip();
-		});
-		return this;
-	});
-
-});
