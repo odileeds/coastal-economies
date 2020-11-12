@@ -176,7 +176,7 @@
 		this.init = function(fn){
 			this.svg = document.createElementNS(ns,'svg');
 			if(this.defaults && this.defaults.shape) this.svg.classList.add('shape');
-			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
+			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; } svg text { font-size:16px;font-family:Arial;font-weight:bold; transform: translate(6px,0); dominant-baseline: middle; text-anchor: start; } svg.shape text.right { transform: translate(-6px,0); text-anchor: end; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
 			this.el.appendChild(this.svg);
 
@@ -414,6 +414,7 @@
 				y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
 				dx = p.x - x;
 				dy = p.y - y;
+				align = this.poi[id][i].align;
 
 				if(!this.poi[id][i]._el){
 					// Create a <g> containing a <circle>, <text> and <text> (background)
@@ -421,23 +422,29 @@
 					this.poi[id][i]._el.classList.add('label');
 					this.poi[id][i]._circle = document.createElementNS(ns,"circle");
 					this.poi[id][i]._circle.setAttribute('r',4);
-					this.poi[id][i]._txt = document.createElementNS(ns,"text");
-					this.poi[id][i]._txt.innerHTML = this.poi[id][i].name;
-					this.poi[id][i]._txt.setAttribute('style','font-size:16px;font-family:Arial;font-weight:bold;stroke:white;stroke-width:5;');
-					this.poi[id][i]._txt2 = document.createElementNS(ns,"text");
-					this.poi[id][i]._txt2.innerHTML = this.poi[id][i].name;
-					this.poi[id][i]._txt2.setAttribute('style','font-size:16px;font-family:Arial;font-weight:bold;');
+
+					txt = document.createElementNS(ns,"text");
+					txt.innerHTML = this.poi[id][i].name;
+					txt.setAttribute('style','stroke:white;stroke-width:5;');
+					this.poi[id][i]._txt = txt;
+
+					txt2 = document.createElementNS(ns,"text");
+					txt2.innerHTML = this.poi[id][i].name;
+
+					this.poi[id][i]._txt2 = txt2;
 					this.poi[id][i]._el.appendChild(this.poi[id][i]._circle);
-					this.poi[id][i]._el.appendChild(this.poi[id][i]._txt);
-					this.poi[id][i]._el.appendChild(this.poi[id][i]._txt2);
+					this.poi[id][i]._el.appendChild(txt);
+					this.poi[id][i]._el.appendChild(txt2);
 					this.group.appendChild(this.poi[id][i]._el);
 				}
 				this.poi[id][i]._circle.setAttribute('cx',x.toFixed(2)+'px');
 				this.poi[id][i]._circle.setAttribute('cy',y.toFixed(2)+'px');
-				this.poi[id][i]._txt.setAttribute('x',((x + fs/2).toFixed(2))+'px');
-				this.poi[id][i]._txt.setAttribute('y',((y + fs/2).toFixed(2))+'px');
-				this.poi[id][i]._txt2.setAttribute('x',((x + fs/2).toFixed(2))+'px');
-				this.poi[id][i]._txt2.setAttribute('y',((y + fs/2).toFixed(2))+'px');
+				this.poi[id][i]._txt.setAttribute('class',align);
+				this.poi[id][i]._txt.setAttribute('x',(x.toFixed(2))+'px');
+				this.poi[id][i]._txt.setAttribute('y',(y.toFixed(2))+'px');
+				this.poi[id][i]._txt2.setAttribute('x',(x.toFixed(2))+'px');
+				this.poi[id][i]._txt2.setAttribute('y',(y.toFixed(2))+'px');
+				this.poi[id][i]._txt2.setAttribute('class',align);
 				s = (this.poi[id][i].scale || 0.9);
 				this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale('+s+',-'+s+');');
 			}
