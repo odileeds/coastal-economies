@@ -113,11 +113,68 @@
 			return this;
 		}
 		this.events = {};
+		this.inputs = {};
+		this.defaults = {};
+		if(options.inputs) this.inputs = options.inputs;
+		if(options.defaults) this.defaults = options.defaults;
+		// Set some defaults if not set
+		for(var i in this.inputs){
+			if(!this.defaults[i]){
+				if(this.inputs[i].tagName=="SELECT") this.defaults[i] = this.inputs[i].value;
+				if(this.inputs[i].tagName=="INPUT"){
+					if(this.inputs[i].type=="checkbox") this.defaults[i] = this.inputs[i].checked;
+				}
+			}
+		}
+console.log(this.defaults)
+		var readyState = false;
 		var ns = 'http://www.w3.org/2000/svg';
 
+		// Make a ready function that waits until readyState is true
+		this.ready = function(f){
+			var _obj = this;
+			if(!readyState) setTimeout(function(){ _obj.ready(f); },9);
+			else{
+				if(typeof f==="function") f.call(this);
+			}
+		};
+
+		// Get points of interest before doing anything else
+		ODI.ajax("data/poi.csv",{
+			"dataType": "text",
+			"this": this,
+			"success": function(d,attr){
+				// Parse the CSV (trimming extra newlines at the end)
+				d = CSVToArray(d.replace(/[\n\r]{1,}$/g,""));
+				var r,p,c,l;
+				// Build an array of points-of-interest
+				this.poi = {};
+				for(r = 1; r < d.length; r++){
+					p = "";
+					for(c = 0; c < d[0].length; c++){
+						if(d[0][c]=="country") p = d[r][c];	
+					}
+					if(p && !this.poi[p]) this.poi[p] = [];
+					this.poi[p].push({});
+					l = this.poi[p].length - 1;
+					for(c = 0; c < d[0].length; c++){
+						k = d[0][c];
+						v = parseFloat(d[r][c]);
+						this.poi[p][l][k] = (v==d[r][c] ? v : d[r][c]);
+						if(k=="segments") this.poi[p][l][k] = this.poi[p][l][k].split(/;/);
+					}
+				}
+				readyState = true;
+			},
+			"error": function(e,attr){
+				this.log.error('Unable to load '+attr._url);
+			}
+		});
+
+		// Initialise the SVG (do this after adding "defaults")
 		this.init = function(fn){
 			this.svg = document.createElementNS(ns,'svg');
-			if(this.defaults.shape) this.svg.classList.add('shape');
+			if(this.defaults && this.defaults.shape) this.svg.classList.add('shape');
 			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
 			this.el.appendChild(this.svg);
@@ -126,13 +183,9 @@
 			this.group = document.createElementNS(ns,'g');
 			this.group.setAttribute('transform','translate(0,'+this.el.clientHeight+') scale(1,-1)');
 			this.svg.appendChild(this.group);
-			// Attach a hover event
-			var _obj = this;
 
-			if(typeof fn==="function") fn.call(this);
 			return this;
-		}
-
+		};
 
 		// Attach a handler to an event for the OSMEditor object in a style similar to that used by jQuery
 		//   .on(eventType[,eventData],handler(eventObject));
@@ -150,7 +203,7 @@
 			if(this.events[ev]) this.events[ev].push({e:e,fn:fn});
 			else this.events[ev] = [{e:e,fn:fn}];
 			return this;
-		}
+		};
 
 		// Trigger a defined event with arguments. This is for internal-use to be 
 		// sure to include the correct arguments for a particular event
@@ -165,7 +218,7 @@
 				}
 			}
 			if(o.length > 0) return o;
-		}
+		};
 
 		this.loadData = function(id,file){
 			this.defaults.id = id;
@@ -351,6 +404,8 @@
 			this.viewBox = {'w':w,'h':h};
 			return this;
 		}
+		
+		this.init();
 
 		return this;
 	}
@@ -610,22 +665,17 @@
 
 })(window || this);
 
-
-function ready(f){
-	if(/in/.test(document.readyState)) setTimeout('ready('+f+')',9);
-	else f();
-};
-
 var app;
-ready(function(){
-	
 
-	app = new ODI.CoastLine('coastline',{'x':{'spacing':0.5,'scale':0.5}});
-	
-	app.inputs = { 'key': document.getElementById('layers'), 'scale': document.getElementById('scales'),'country': document.getElementById('country'), 'shape': document.getElementById('shaper') };
-	app.defaults = {'lat':52,'lon':-1,'zoom':4,'key':app.inputs.key.value,'scale':app.inputs.scale.value,'country':app.inputs.country.value,'shape':app.inputs.shape.checked};
+ODI.ready(function(){
 
-	app.init(function(){
+	app = new ODI.CoastLine('coastline',{
+		'x':{'spacing':0.5,'scale':0.5},
+		'inputs': { 'key': document.getElementById('layers'), 'scale': document.getElementById('scales'),'country': document.getElementById('country'), 'shape': document.getElementById('shaper') },
+		'defaults': {}
+	});
+
+	app.ready(function(){
 
 		this.loadData(this.defaults.country,this.inputs.country.options[this.inputs.country.selectedIndex].getAttribute('data-file'));
 
