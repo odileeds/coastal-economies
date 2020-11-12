@@ -1,8 +1,8 @@
-name,country,lat,lon,segments
-Belfast,IRL,54.596389,-5.93,95GG20S1
-Cork,IRL,51.897222,-8.47,18195Templebreedy
-Derry,IRL,54.9958,-7.3074,95MM07W1
-Dublin,IRL,53.35,-6.267,05052Dún Laoghaire-West Central
-Galway,IRL,53.271944,-9.048889,27060Oranmore
-Limerick,IRL,52.6653,-8.6238,21058Carrig
-Sligo,IRL,54.2667,-8.4833,31053Knockaree
+name,country,lat,lon,segments,scale
+Belfast,IRL,54.596389,-5.93,95GG20S1,0.9
+Cork,IRL,51.897222,-8.47,18195Templebreedy,0.75
+Derry,IRL,54.9958,-7.3074,95MM07W1,0.75
+Dublin,IRL,53.35,-6.267,05052Dún Laoghaire-West Central,0.9
+Galway,IRL,53.271944,-9.048889,27060Oranmore,0.75
+Limerick,IRL,52.6653,-8.6238,21058Carrig,0.75
+Sligo,IRL,54.2667,-8.4833,31053Knockaree,0.75

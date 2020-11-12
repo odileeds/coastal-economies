@@ -438,7 +438,8 @@
 				this.poi[id][i]._txt.setAttribute('y',((y + fs/2).toFixed(2))+'px');
 				this.poi[id][i]._txt2.setAttribute('x',((x + fs/2).toFixed(2))+'px');
 				this.poi[id][i]._txt2.setAttribute('y',((y + fs/2).toFixed(2))+'px');
-				this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale(0.9,-0.9);');
+				s = (this.poi[id][i].scale || 0.9);
+				this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale('+s+',-'+s+');');
 			}
 
 
