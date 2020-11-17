@@ -1,4 +1,4 @@
-name,country,lat,lon,segments,scale,align
+name,coast,lat,lon,segments,scale,align
 Belfast,IRL,54.596389,-5.93,95GG20S1,0.9,right
 Cork,IRL,51.897222,-8.47,18195Templebreedy,0.75,right
 Derry,IRL,54.9958,-7.3074,95MM07W1,0.75,

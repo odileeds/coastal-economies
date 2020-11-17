@@ -126,8 +126,8 @@
 		<p>This is part of a <a href="https://odileeds.org/projects/coastal-economies/">collaborative project between ODI Leeds and UK Major Ports Group</a> on coastal economies. After <a href="https://odileeds.github.io/coastal-economies/">defining the coast</a>, and segmenting it, we calculated the mean income quintile for each coastal segment. The results are shown below on a segmented-coast view but you can also switch to a view that presents the the coastline as a linear barchart.</p>
 		<div class="selector">
 			<div class="row">
-				<label for="country">Coast</label>
-				<select id="country">
+				<label for="coast">Coast</label>
+				<select id="coast">
 					<option value="IRL" data-file="data/IRL.csv" selected>Ireland</option>
 				</select>
 			</div>
@@ -170,13 +170,13 @@
 	ODI.ready(function(){
 		app = new ODI.CoastLine('coastline',{
 			'x':{'spacing':0.5},
-			'inputs': { 'key': document.getElementById('layers'), 'scale': document.getElementById('scales'),'country': document.getElementById('country'), 'shape': document.getElementById('shaper') },
+			'inputs': { 'key': document.getElementById('layers'), 'scale': document.getElementById('scales'),'coast': document.getElementById('coast'), 'shape': document.getElementById('shaper') },
 			'poi': 'data/poi.csv'
 		});
 
 		app.ready(function(){
 
-			this.loadData(this.defaults.country,this.inputs.country.options[this.inputs.country.selectedIndex].getAttribute('data-file'));
+			this.loadData(this.defaults.coast,this.inputs.coast.options[this.inputs.coast.selectedIndex].getAttribute('data-file'));
 
 			// Add event to shape/line toggle
 			var _obj = this;

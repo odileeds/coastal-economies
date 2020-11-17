@@ -153,7 +153,7 @@
 				for(r = 1; r < d.length; r++){
 					p = "";
 					for(c = 0; c < d[0].length; c++){
-						if(d[0][c]=="country") p = d[r][c];	
+						if(d[0][c]=="coast") p = d[r][c];	
 					}
 					if(p && !this.poi[p]) this.poi[p] = [];
 					this.poi[p].push({});
