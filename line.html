@@ -96,6 +96,7 @@
 	svg .coast { fill: #efefef; }
 	footer { margin-top: 2em; }
 	footer > div.holder { padding-bottom: 3em; }
+	.holder { width: 100%; }
 	@media only screen and (max-width: 1080px) {
 		.selector {
 			grid-template-columns: repeat(2, 1fr);
@@ -125,7 +126,7 @@
 		<p>This is part of a <a href="https://odileeds.org/projects/coastal-economies/">collaborative project between ODI Leeds and UK Major Ports Group</a> on coastal economies. After <a href="https://odileeds.github.io/coastal-economies/">defining the coast</a>, and segmenting it, we calculated the mean income quintile for each coastal segment. The results are shown below on a segmented-coast view but you can also switch to a view that presents the the coastline as a linear barchart.</p>
 		<div class="selector">
 			<div class="row">
-				<label for="country">Country</label>
+				<label for="country">Coast</label>
 				<select id="country">
 					<option value="IRL" data-file="data/IRL.csv" selected>Ireland</option>
 				</select>
