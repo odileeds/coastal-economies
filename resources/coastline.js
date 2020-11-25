@@ -289,7 +289,7 @@
 
 			if(!id) id = this.defaults.id;
 
-			var d,r,i,k,path,vb,xy,len,xsep,pad,x,y,ang,tall;
+			var d,r,i,k,path,vb,xy,len,xsep,pad,x,y,ang,tall,_obj,w;
 
 			r = {'lat':{'min':1e100,'max':-1e100},'lon':{'min':1e100,'max':-1e100}};
 
@@ -317,7 +317,7 @@
 
 			vb = this.viewBox;
 			xy = new Array(this.data[id].length);
-			var _obj = this; 
+			_obj = this; 
 			
 			function getXY(lat,lon){
 				var dlat = r.lat.max-r.lat.min;
@@ -331,9 +331,9 @@
 				var y = 0;
 				x = _obj.opt.x.padding + (lon - r.lon.min)*scale*lonscale;
 				y = _obj.opt.y.padding + (lat - r.lat.min)*scale;
-				return {'x':x,'y':y};
+				return {'x':x,'y':y,'w':(dlon)*scale*(Math.cos(((r.lat.max-r.lat.min)/2 + r.lat.min)*Math.PI/180))};
 			}
-			
+
 			if(!this.coast){
 				this.coast = document.createElementNS(ns,"path");
 				this.group.appendChild(this.coast);
@@ -345,7 +345,20 @@
 			y = this.opt.y.padding;
 			xsep = (this.opt.x && this.opt.x.spacing ? this.opt.x.spacing : 0);
 
-			var _obj = this;
+			// Calculate the new width of the SVG based on the barchart
+			w = this.opt.x.padding;
+			for(i = 0; i < this.data[id].length; i++){
+				xy[i] = {'start':getXY(this.data[id][i].startlat,this.data[id][i].startlon),'end':getXY(this.data[id][i].endlat,this.data[id][i].endlon)};
+				len = Math.sqrt(Math.pow((xy[i].start.x - xy[i].end.x),2) + Math.pow((xy[i].start.y - xy[i].end.y),2));
+				w += len + xsep;
+			}
+			w += this.opt.x.padding;
+
+			// Set SVG size
+			this.setSize(w,vb.h);
+
+			// Find the x-offset to shift the map to the middle
+			xoff = (w - xy[0].start.w)/2;
 
 			for(i = 0; i < this.data[id].length; i++){
 				xy[i] = {'start':getXY(this.data[id][i].startlat,this.data[id][i].startlon),'end':getXY(this.data[id][i].endlat,this.data[id][i].endlon)};
@@ -367,12 +380,13 @@
 				xy[i].colour = ODI.Colour.getColourFromScale(this.defaults.scale,this.data[id][i][this.defaults.key],r[this.defaults.key].min,r[this.defaults.key].max);
 
 				// Calculate the x,y offsets for the line compared to the shape
-				dx = xy[i].start.x - x;
+				dx = xy[i].start.x + xoff - x;
 				dy = xy[i].start.y - y;
 
 				tall = (vb.h - this.opt.y.padding*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
 
-				d += (i==0 ? 'M':' L')+xy[i].start.x.toFixed(2)+','+xy[i].start.y.toFixed(2);
+				// Set coastline shape path
+				d += (i==0 ? 'M':' L')+(xoff + xy[i].start.x).toFixed(2)+','+xy[i].start.y.toFixed(2);
 
 				this.data[id][i]._el.setAttribute('width',len.toFixed(2));
 				this.data[id][i]._el.setAttribute('height',tall);
@@ -403,8 +417,6 @@
 			this.coast.setAttribute('class','coast');
 			x += this.opt.x.padding;
 
-			this.setSize(x,vb.h);
-
 			fs = 12;
 
 			// Add points of interest
@@ -412,7 +424,7 @@
 				p = getXY(this.poi[id][i].lat,this.poi[id][i].lon);
 				x = this.poi[id][i]._p.x;
 				y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
-				dx = p.x - x;
+				dx = p.x + xoff - x;
 				dy = p.y - y;
 				align = this.poi[id][i].align;
 
@@ -449,6 +461,7 @@
 				this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale('+s+',-'+s+');');
 			}
 
+			this.el.scrollLeft = (w - this.el.offsetWidth)/2 + this.opt.x.padding;
 
 			return this;
 		}
