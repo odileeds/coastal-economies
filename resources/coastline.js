@@ -281,7 +281,7 @@
 			// Position the tooltip
 			var bb = el.getBoundingClientRect();	// Bounding box of SVG element
 			var bbo = this.el.getBoundingClientRect(); // Bounding box of SVG holder
-			this.tooltip.setAttribute('style','position:absolute;left:'+Math.round(bb.left + bb.width/2 - bbo.left)+'px;top:'+Math.round(bb.top + bb.height/2 - bbo.top)+'px;transform:translate3d(0,-50%,0);');
+			this.tooltip.setAttribute('style','position:absolute;left:'+Math.round(bb.left + bb.width/2 - bbo.left + this.el.scrollLeft)+'px;top:'+Math.round(bb.top + bb.height/2 - bbo.top)+'px;transform:translate3d(0,-50%,0);');
 
 			return this;
 		}
@@ -358,7 +358,7 @@
 			this.setSize(w,vb.h);
 
 			// Find the x-offset to shift the map to the middle
-			xoff = (w - xy[0].start.w)/2;
+			this.xoff = (w - xy[0].start.w)/2;
 
 			for(i = 0; i < this.data[id].length; i++){
 				xy[i] = {'start':getXY(this.data[id][i].startlat,this.data[id][i].startlon),'end':getXY(this.data[id][i].endlat,this.data[id][i].endlon)};
@@ -380,13 +380,13 @@
 				xy[i].colour = ODI.Colour.getColourFromScale(this.defaults.scale,this.data[id][i][this.defaults.key],r[this.defaults.key].min,r[this.defaults.key].max);
 
 				// Calculate the x,y offsets for the line compared to the shape
-				dx = xy[i].start.x + xoff - x;
+				dx = xy[i].start.x + this.xoff - x;
 				dy = xy[i].start.y - y;
 
 				tall = (vb.h - this.opt.y.padding*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
 
 				// Set coastline shape path
-				d += (i==0 ? 'M':' L')+(xoff + xy[i].start.x).toFixed(2)+','+xy[i].start.y.toFixed(2);
+				d += (i==0 ? 'M':' L')+(this.xoff + xy[i].start.x).toFixed(2)+','+xy[i].start.y.toFixed(2);
 
 				this.data[id][i]._el.setAttribute('width',len.toFixed(2));
 				this.data[id][i]._el.setAttribute('height',tall);
@@ -424,7 +424,7 @@
 				p = getXY(this.poi[id][i].lat,this.poi[id][i].lon);
 				x = this.poi[id][i]._p.x;
 				y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
-				dx = p.x + xoff - x;
+				dx = p.x + this.xoff - x;
 				dy = p.y - y;
 				align = this.poi[id][i].align;
 
