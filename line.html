@@ -129,6 +129,8 @@
 				<select id="coast">
 					<!-- Using FIFA country codes as they include the four nations of the UK -->
 					<option value="IRL-NIR" data-file="data/IRL-NIR.csv" selected>Ireland &amp; Northern Ireland</option>
+					<option value="FRA-BEL" data-file="data/FRA-BEL.csv">France and Belgium</option>
+					<option value="ENG-SCO-WAL" data-file="data/ENG-SCO-WAL.csv">England, Scotland &amp; Wales</option>
 				</select>
 			</div>
 			<div class="row">
@@ -180,6 +182,10 @@
 
 			// Add event to shape/line toggle
 			var _obj = this;
+			this.inputs.coast.addEventListener('change', function(e){
+				_obj.loadData(e.currentTarget.value,e.currentTarget.options[e.currentTarget.selectedIndex].getAttribute('data-file'));
+			});
+
 			this.inputs.shape.addEventListener('change', function(e){
 				if(e.currentTarget.checked) _obj.svg.classList.add('shape');
 				else _obj.svg.classList.remove('shape');
