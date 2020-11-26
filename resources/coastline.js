@@ -176,7 +176,7 @@
 		this.init = function(fn){
 			this.svg = document.createElementNS(ns,'svg');
 			if(this.defaults && this.defaults.shape) this.svg.classList.add('shape');
-			this.svg.innerHTML += '<style>svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; } svg text { font-size:16px;font-family:Arial;font-weight:bold; transform: translate(6px,0); dominant-baseline: middle; text-anchor: start; } svg.shape text.right { transform: translate(-6px,0); text-anchor: end; }</style>';
+			this.svg.innerHTML += '<style>path.coast { fill: #efefef; }svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; } svg text { font-size:16px;font-family:Arial;font-weight:bold; transform: translate(6px,0); dominant-baseline: middle; text-anchor: start; } svg.shape text.right { transform: translate(-6px,0); text-anchor: end; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
 			this.el.appendChild(this.svg);
 
