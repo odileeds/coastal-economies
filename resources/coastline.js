@@ -162,7 +162,9 @@
 						k = d[0][c];
 						v = parseFloat(d[r][c]);
 						this.poi[p][l][k] = (v==d[r][c] ? v : d[r][c]);
-						if(k=="segments") this.poi[p][l][k] = this.poi[p][l][k].split(/;/);
+						if(k=="segments"){
+							this.poi[p][l][k] = (this.poi[p][l][k]+'').split(/;/);
+						}
 					}
 				}
 				readyState = true;
