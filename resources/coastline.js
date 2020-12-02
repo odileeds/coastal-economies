@@ -336,7 +336,6 @@
 			if(!this.tooltip){
 				this.tooltip = document.createElement('div');
 				this.tooltip.setAttribute('id','tooltip');
-				this.tooltip.innerHTML = "fred";
 				this.svg.insertAdjacentElement('afterend', this.tooltip);
 				var _obj = this;
 				this.tooltip.addEventListener('mouseout',function(e){ _obj.hideTooltip(); });
@@ -495,7 +494,7 @@
 					}
 					
 					this.data[id][i]._txt.innerHTML = this.data[id][i].nearestid+': '+this.data[id][i][this.defaults.key];
-					this.data[id][i]._tooltip = this.data[id][i].nearestid+'<br />'+this.data[id][i][this.defaults.key]
+					this.data[id][i]._tooltip = '<span>'+this.data[id][i].country+'</span><br /><span>'+this.data[id][i].nearestid+'</span><br /><span>'+this.data[id][i][this.defaults.key]+'</span>'
 
 					x += len + xsep;
 					gap = false;
