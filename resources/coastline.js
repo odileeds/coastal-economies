@@ -302,8 +302,12 @@
 						data[r-1] = {};
 						for(c = 0; c < d[0].length; c++){
 							k = d[0][c];
-							v = parseFloat(d[r][c]);
-							data[r-1][k] = (v==d[r][c] ? v : d[r][c]);
+							if(d[0][c]!="nearestid"){
+								v = parseFloat(d[r][c]);
+								data[r-1][k] = (v==d[r][c] ? v : d[r][c])
+							}else{
+								data[r-1][k] = d[r][c];
+							}
 						}
 					}
 					if(!this.data) this.data = {};
