@@ -66,8 +66,7 @@
 		position: relative;
 		overflow-y: hidden;
 		overflow-x: scroll;
-		min-height: 400px;
-		height: 80vh;
+		height: calc(100vh - 17em);
 	}
 	#coastline::after {
 		content: "";
@@ -75,7 +74,7 @@
 	}
 	.selector {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(3, 1fr);
 		grid-gap: 0.25em 1em;
 	}
 	.row { text-align: center; }
@@ -95,7 +94,11 @@
 	}
 	footer { margin-top: 2em; }
 	footer > div.holder { padding-bottom: 3em; }
-	.holder { width: 100%; }
+	footer a { color: inherit!important; }
+	.holder.fullwidth { width: 100%; }
+	.resizing {
+	
+	}
 	@media only screen and (max-width: 1080px) {
 		.selector {
 			grid-template-columns: repeat(2, 1fr);
@@ -105,33 +108,34 @@
 		.selector {
 			grid-template-columns: 100%;
 		}
-		#coastline {
-			height: 400px;
-			max-height: 80vh;
-		}
 		.selector .row { text-align: left; }
 		.selector label.switch { margin: 0; }
+		#coastline { max-height: 90vw; }
 	}
 	</style>
 </head>
 <body class="b6-bg">
 
-	<header class="b1-bg">
+	<header class="b2-bg">
 		<div class="padded holder">
 			<h1>Coastal Economies on a line</h1>
 		</div>
 	</header>
+
+	<div class="padded holder fullwidth">
+		<div id="coastline"></div>
+	</div>
+
 	<div class="padded holder">
-		<p>This is part of a <a href="https://odileeds.org/projects/coastal-economies/">collaborative project between ODI Leeds and UK Major Ports Group</a> on coastal economies. After <a href="https://odileeds.github.io/coastal-economies/">defining the coast</a>, and segmenting it, we calculated the mean income quintile for each coastal segment. The results are shown below on a segmented-coast view but you can also switch to a view that presents the the coastline as a linear barchart.</p>
 		<div class="selector">
 			<div class="row">
 				<label for="coast">Coast</label>
 				<select id="coast">
 					<!-- Using FIFA country codes as they include the four nations of the UK -->
-					<option value="IRL-NIR" data-file="data/IRL-NIR.csv" selected>Ireland &amp; Northern Ireland</option>
+					<option value="ALL" data-file="data/ALL.csv" selected>All</option>
+					<option value="IRL-NIR" data-file="data/IRL-NIR.csv">Ireland &amp; Northern Ireland</option>
 					<option value="FRA-BEL" data-file="data/FRA-BEL.csv">France &amp; Belgium</option>
 					<option value="ENG-SCO-WAL" data-file="data/ENG-SCO-WAL.csv">England, Scotland &amp; Wales</option>
-					<option value="ALL" data-file="data/ALL.csv">All</option>
 				</select>
 			</div>
 			<div class="row">
@@ -140,7 +144,7 @@
 					<option value="averageincquintile" selected>Income (quintile)</option>
 				</select>
 			</div>
-			<div class="row">
+			<div class="row" style="display:none;">
 				<label for="scales">Colour scale</label>
 				<select id="scales">
 					<option value="Heat">Heat</option>
@@ -155,15 +159,11 @@
 			  <span class="slider"></span>
 			  <span>Toggle map/chart</span>
 			</label>
-		</div>
+		</div>	
 	</div>
-
-	<div class="padded holder">
-		<div id="coastline"></div>
-	</div>
-
 	<footer class="b2-bg">
-		<div class="holder padded">
+		<div class="holder doublepadded">
+			<p>This is part of a <a href="https://odileeds.org/projects/coastal-economies/">collaborative project between ODI Leeds and UK Major Ports Group</a> on coastal economies. After <a href="https://odileeds.github.io/coastal-economies/">defining the coast</a>, and segmenting it, we calculated the mean income quintile for each coastal segment. The results are shown below on a segmented-coast view but you can also switch to a view that presents the the coastline as a linear barchart.</p>
 			<p>Visualisation &copy; ODI Leeds 2020
 		</div>
 	</footer>
@@ -188,8 +188,12 @@
 			});
 
 			this.inputs.shape.addEventListener('change', function(e){
-				if(e.currentTarget.checked) _obj.svg.classList.add('shape');
-				else _obj.svg.classList.remove('shape');
+				if(e.currentTarget.checked){
+					_obj.svg.classList.add('shape');
+					_obj.centreView();
+				}else{
+					_obj.svg.classList.remove('shape');
+				}
 				_obj.hideTooltip();
 			});
 

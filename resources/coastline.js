@@ -174,19 +174,78 @@
 			}
 		});
 
+		// Clear away all the elements we've made
+		this.resize = function(){
+
+			if(this.svg) this.svg.classList.add('resizing');
+
+			this.setSize(this.el.clientWidth,this.el.clientHeight);
+			this.updateSVG();
+			if(this.svg) this.svg.classList.remove('resizing');
+			return this;
+		};
+		
+		this.clearCoast = function(){
+			function clearEl(el){
+				if(el){
+					while(el.firstChild){
+						el.removeChild(el.firstChild);
+					}
+				}else{
+					console.error('No element',el);
+				}
+			}
+			if(this.data){
+				var id = this.defaults.id;
+				if(this.data[id]){
+					for(var i = 0; i < this.data[id].length; i++){
+						if(this.data[id][i]._el && this.data[id][i]._el.parentNode){
+							this.data[id][i]._el.parentNode.removeChild(this.data[id][i]._el);
+							delete this.data[id][i]._el;
+						}
+					}
+				}
+			}
+			if(this.group){
+				// Clear group
+				clearEl(this.group);
+				delete this.group;
+				if(this.coast) delete this.coast;
+				if(this.poi){
+					for(poi in this.poi){
+						// Remove points of interest
+						for(i = 0; i < this.poi[poi].length; i++){
+							if(this.poi[poi][i]._el){
+								clearEl(this.poi[poi][i]._el);
+								delete this.poi[poi][i]._el;
+							}
+						}
+					}
+				}
+				
+			}
+			/*
+			if(this.svg){
+				if(this.svg.parentNode) this.svg.parentNode.removeChild(this.svg);
+				delete this.svg;
+			}*/
+			return this;
+		}
 		// Initialise the SVG (do this after adding "defaults")
 		this.init = function(fn){
-			this.svg = document.createElementNS(ns,'svg');
+			if(!this.svg){
+				this.svg = document.createElementNS(ns,'svg');
+				this.el.appendChild(this.svg);
+			}
 			if(this.defaults && this.defaults.shape) this.svg.classList.add('shape');
-			this.svg.innerHTML += '<style>path.coast { fill: #efefef; }svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; } svg text { font-size:16px;font-family:Arial;font-weight:bold; transform: translate(6px,0); dominant-baseline: middle; text-anchor: start; } svg.shape text.right { transform: translate(-6px,0); text-anchor: end; }</style>';
+			this.svg.innerHTML += '<style>path.coast { fill: #efefef; }svg:not(.shape) rect { transform: scale(1)!important; } svg:not(.shape) .label { transform: scale(1,-1)!important; } svg:not(.shape) rect, svg:not(.shape) .label { transition: transform 1s ease 0s, height 0.5s ease 1s, fill 1.5s ease 0s;} svg.shape rect, svg.shape .label { cursor: pointer; height: 6px; rx: 3px; transition: transform 1s ease 0.5s, height 0.5s ease 0s, fill 1.5s ease 0s!important; } svg.shape.resizing rect, svg.shape.resizing .label { transition: unset!important; } svg text { font-size:16px;font-family:Arial;font-weight:bold; transform: translate(6px,0); dominant-baseline: middle; text-anchor: start; } svg.shape text.right { transform: translate(-6px,0); text-anchor: end; }</style>';
 			this.setSize(this.el.clientWidth,this.el.clientHeight);
-			this.el.appendChild(this.svg);
 
 			// Now create a <g> to flip the coordinate system
-			this.group = document.createElementNS(ns,'g');
-			this.group.setAttribute('transform','translate(0,'+this.el.clientHeight+') scale(1,-1)');
-			this.svg.appendChild(this.group);
-
+			if(!this.group){
+				this.group = document.createElementNS(ns,'g');
+				this.svg.appendChild(this.group);
+			}
 			return this;
 		};
 
@@ -225,13 +284,15 @@
 
 		this.loadData = function(id,file){
 			this.defaults.id = id;
+			this.clearCoast();
 			ODI.ajax(file,{
 				"dataType":"text",
 				"this": this,
 				"id": id,
 				"success": function(d,attr){
 					var r,c,k,v,data,n;
-					
+					this.init();
+
 					// Parse the CSV (trimming extra newlines at the end)
 					d = CSVToArray(d.replace(/[\n\r]{1,}$/g,""));
 
@@ -293,6 +354,9 @@
 
 			var d,r,i,k,path,vb,xy,len,xsep,pad,x,y,ang,tall,_obj,w;
 
+			// Set group transform
+			this.group.setAttribute('transform','translate(0,'+this.el.clientHeight+') scale(1,-1)');
+
 			r = {'lat':{'min':1e100,'max':-1e100},'lon':{'min':1e100,'max':-1e100}};
 
 			if(!this.opt) this.opt = {};
@@ -320,7 +384,7 @@
 			vb = this.viewBox;
 			xy = new Array(this.data[id].length);
 			_obj = this; 
-			
+
 			function clearEl(el){
 				if(el){
 					while(el.firstChild){
@@ -330,37 +394,23 @@
 					console.error('No element',el);
 				}
 			}
-			
+
+			// Get viewport size and map properties
+			var _w,_h,dlat,dlon,dh,dw;
+			_w = this.el.clientWidth;
+			_h = this.el.clientHeight;
+			dh = _h - 2*_obj.opt.y.padding;
+			dw = _w - 2*_obj.opt.x.padding;
+			dlat = r.lat.max-r.lat.min;
+			dlon = r.lon.max-r.lon.min;
+
 			function getXY(lat,lon){
-				var dlat = r.lat.max-r.lat.min;
-				var dlon = r.lon.max-r.lon.min;
-				var lonscale = Math.cos(lat*Math.PI/180);
-				var dh = vb.h - 2*_obj.opt.y.padding;
-				var dw = vb.w - 2*_obj.opt.x.padding;
-				var scale = Math.min(dh/dlat,dw/dlon);
-
-				var x = 0;
-				var y = 0;
-				x = _obj.opt.x.padding + (lon - r.lon.min)*scale*lonscale;
-				y = _obj.opt.y.padding + (lat - r.lat.min)*scale;
-				return {'x':x,'y':y,'w':(dlon)*scale*(Math.cos(((r.lat.max-r.lat.min)/2 + r.lat.min)*Math.PI/180))};
-			}
-
-			if(this.group){
-				// Clear group
-				clearEl(this.group);
-				if(this.coast) delete this.coast;
-				if(this.poi){
-					for(poi in this.poi){
-						// Remove points of interest
-						for(i = 0; i < this.poi[poi].length; i++){
-							if(this.poi[poi][i]._el){
-								clearEl(this.poi[poi][i]._el);
-								delete this.poi[poi][i]._el;
-							}
-						}
-					}
-				}
+				var x,y,s;
+				if(dh > dw) s = dw/dlat;
+				else s = dh/dlat;
+				x = _obj.opt.x.padding + (lon - r.lon.min)*s*Math.cos(lat*Math.PI/180);
+				y = _obj.opt.y.padding + (lat - r.lat.min)*s;
+				return {'x':x,'y':y,'w':(dlon)*s*(Math.cos(((r.lat.max-r.lat.min)/2 + r.lat.min)*Math.PI/180))};
 			}
 
 			if(!this.coast){
@@ -499,10 +549,16 @@
 				}
 			}
 
-			this.el.scrollLeft = (w - this.el.offsetWidth)/2 + this.opt.x.padding;
+			this.centreView(0);
 
 			return this;
-		}
+		};
+
+		this.centreView = function(time){
+			scrollX(this.el,(this.viewBox.w - this.el.offsetWidth)/2 + this.opt.x.padding,(typeof time==="number" ? time : 1000));
+			return this;
+		};
+		
 		this.setSize = function(w,h){
 			this.svg.setAttribute('width',w);
 			this.svg.setAttribute('height',h);
@@ -511,8 +567,11 @@
 			this.svg.setAttribute('preserveAspectRatio','xMinYMin meet');
 			this.viewBox = {'w':w,'h':h};
 			return this;
-		}
-		
+		};
+
+		var _obj = this;
+		window.addEventListener('resize', function(){ _obj.resize(); });
+
 		this.init();
 
 		return this;
@@ -770,5 +829,61 @@
 	}
 
 	root.ODI.Colour = new Colours();
+
+
+
+	// first add raf shim
+	// http://www.paulirish.com/2011/requestanimationframe-for-smart-animating/
+	window.requestAnimFrame = (function(){
+		return  window.requestAnimationFrame       ||
+			window.webkitRequestAnimationFrame ||
+			window.mozRequestAnimationFrame    ||
+			function( callback ){
+				window.setTimeout(callback, 1000 / 60);
+			};
+	})();
+
+	// main function
+	function scrollX(el, endpos, time, easing) {
+		// endpos: the target scrollX property of the window
+		// time: time in milliseconds
+		// easing: easing equation to use
+
+		var pos = el.scrollLeft,
+		endpos = endpos || 0,
+		easing = easing || 'easeOutSine',
+		currentTime = 0,
+		start = new Date();
+		if(!time) time = 0;
+
+		// easing equations from https://github.com/danro/easing-js/blob/master/easing.js
+		var PI_D2 = Math.PI / 2,
+		easingEquations = {
+			easeOutSine: function (pos){ return Math.sin(pos * (Math.PI / 2)); },
+			easeInOutSine: function (pos) { return (-0.5 * (Math.cos(Math.PI * pos) - 1)); },
+			easeInOutQuint: function (pos) {
+				if ((pos /= 0.5) < 1) {
+					return 0.5 * Math.pow(pos, 5);
+				}
+				return 0.5 * (Math.pow((pos - 2), 5) + 2);
+			}
+		};
+
+		// add animation loop
+		function tick() {
+			var p,t;
+			p = ((new Date())-start)/time;
+			t = easingEquations[easing](p);
+
+			if(p < 1){
+				requestAnimFrame(tick);
+				el.scrollLeft = pos + ((endpos - pos) * t);
+			}else{
+				el.scrollLeft = endpos;
+			}
+		}
+		// call it once to get started
+		tick();
+	}
 
 })(window || this);
