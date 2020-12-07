@@ -1,7 +1,6 @@
 name,coast,lat,lon,segments,scale,align
 Marseille,FRA-BEL,43.29,5.375,13055,0.9,left
 Dublin,IRL-NIR,53.3331,-6.2489,05052Dún Laoghaire-West Central,0.9,left
-Nice,FRA-BEL,43.715,7.265,6159,0.9,left
 Caerdydd,ENG-SCO-WAL,51.5,-3.225,W02000364,0.9,left
 Liverpool,ENG-SCO-WAL,53.416,-2.918,E02001360,0.9,left
 Southend-on-Sea,ENG-SCO-WAL,51.55,0.72,E02003287,0.9,left
