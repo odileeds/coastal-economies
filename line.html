@@ -143,6 +143,8 @@
 				<label for="layers">Attribute</label>
 				<select id="layers">
 					<option value="averageincquintile" selected>Income (quintile)</option>
+					<option value="average2019detachedhouseprice">Detached house price (GBP)</option>
+					<option value="coastalpopulationdensity">Pop. density (people/km&sup2;)</option>
 				</select>
 			</div>
 			<div class="row" style="display:none;">
@@ -208,6 +210,12 @@
 			this.inputs.scale.setAttribute('data',this.defaults.scale);
 			this.inputs.scale.addEventListener('change', function(e){
 				_obj.defaults.scale = e.currentTarget.value;
+				_obj.updateSVG();
+				_obj.hideTooltip();
+			});
+			this.inputs.key.addEventListener('change', function(e){
+				console.log(e.currentTarget.value);
+				_obj.defaults.key = e.currentTarget.value;
 				_obj.updateSVG();
 				_obj.hideTooltip();
 			});
