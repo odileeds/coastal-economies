@@ -289,6 +289,7 @@
 			ODI.ajax(file,{
 				"dataType":"text",
 				"this": this,
+				"cache": false,
 				"id": id,
 				"success": function(d,attr){
 					var r,c,k,v,data,n;
