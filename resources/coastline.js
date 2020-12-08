@@ -461,13 +461,15 @@
 						this.data[id][i]._el.appendChild(this.data[id][i]._txt);
 					}
 
-					xy[i].colour = ODI.Colour.getColourFromScale(this.defaults.scale,this.data[id][i][this.defaults.key],r[this.defaults.key].min,r[this.defaults.key].max);
+					if(!this.data[id][i][this.defaults.key]) console.error('No data for key '+this.defaults.key+' in ',this.data[id][i]);
+
+					xy[i].colour = (this.data[id][i][this.defaults.key] ? ODI.Colour.getColourFromScale(this.defaults.scale,this.data[id][i][this.defaults.key],r[this.defaults.key].min,r[this.defaults.key].max) : '#999999');
 
 					// Calculate the x,y offsets for the line compared to the shape
 					dx = xy[i].start.x + this.xoff - x;
 					dy = xy[i].start.y - y;
 
-					tall = (vb.h - this.opt.y.padding*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0);
+					tall = (this.data[id][i][this.defaults.key] ? (vb.h - this.opt.y.padding*2) * (this.data[id][i][this.defaults.key] - 0)/(r[this.defaults.key].max - 0) : 0);
 
 					// Set coastline shape path
 					d += (i==0 || gap ? 'M':' L')+(this.xoff + xy[i].start.x).toFixed(2)+','+xy[i].start.y.toFixed(2);
@@ -513,44 +515,46 @@
 				// Add points of interest
 				for(i = 0; i < this.poi[id].length; i++){
 					p = getXY(this.poi[id][i].lat,this.poi[id][i].lon);
-					if(!this.poi[id][i]._p) console.error('No point made for '+id+','+i+'. That probably means no nearest segment was found.',this.poi[id][i]);
-					x = this.poi[id][i]._p.x;
-					y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
-					dx = p.x + this.xoff - x;
-					dy = p.y - y;
-					align = this.poi[id][i].align;
+					if(!this.poi[id][i]._p) console.error('No point made for',this.poi[id][i]);
+					else{
+						x = this.poi[id][i]._p.x;
+						y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
+						dx = p.x + this.xoff - x;
+						dy = p.y - y;
+						align = this.poi[id][i].align;
 
-					if(!this.poi[id][i]._el){
-						// Create a <g> containing a <circle>, <text> and <text> (background)
-						this.poi[id][i]._el = document.createElementNS(ns,"g");
-						this.poi[id][i]._el.classList.add('label');
-						this.poi[id][i]._circle = document.createElementNS(ns,"circle");
-						this.poi[id][i]._circle.setAttribute('r',4);
+						if(!this.poi[id][i]._el){
+							// Create a <g> containing a <circle>, <text> and <text> (background)
+							this.poi[id][i]._el = document.createElementNS(ns,"g");
+							this.poi[id][i]._el.classList.add('label');
+							this.poi[id][i]._circle = document.createElementNS(ns,"circle");
+							this.poi[id][i]._circle.setAttribute('r',4);
 
-						txt = document.createElementNS(ns,"text");
-						txt.innerHTML = this.poi[id][i].name;
-						txt.setAttribute('style','stroke:white;stroke-width:5;');
-						this.poi[id][i]._txt = txt;
+							txt = document.createElementNS(ns,"text");
+							txt.innerHTML = this.poi[id][i].name;
+							txt.setAttribute('style','stroke:white;stroke-width:5;');
+							this.poi[id][i]._txt = txt;
 
-						txt2 = document.createElementNS(ns,"text");
-						txt2.innerHTML = this.poi[id][i].name;
+							txt2 = document.createElementNS(ns,"text");
+							txt2.innerHTML = this.poi[id][i].name;
 
-						this.poi[id][i]._txt2 = txt2;
-						this.poi[id][i]._el.appendChild(this.poi[id][i]._circle);
-						this.poi[id][i]._el.appendChild(txt);
-						this.poi[id][i]._el.appendChild(txt2);
-						this.group.appendChild(this.poi[id][i]._el);
+							this.poi[id][i]._txt2 = txt2;
+							this.poi[id][i]._el.appendChild(this.poi[id][i]._circle);
+							this.poi[id][i]._el.appendChild(txt);
+							this.poi[id][i]._el.appendChild(txt2);
+							this.group.appendChild(this.poi[id][i]._el);
+						}
+						this.poi[id][i]._circle.setAttribute('cx',x.toFixed(2)+'px');
+						this.poi[id][i]._circle.setAttribute('cy',y.toFixed(2)+'px');
+						this.poi[id][i]._txt.setAttribute('class',align);
+						this.poi[id][i]._txt.setAttribute('x',(x.toFixed(2))+'px');
+						this.poi[id][i]._txt.setAttribute('y',(y.toFixed(2))+'px');
+						this.poi[id][i]._txt2.setAttribute('x',(x.toFixed(2))+'px');
+						this.poi[id][i]._txt2.setAttribute('y',(y.toFixed(2))+'px');
+						this.poi[id][i]._txt2.setAttribute('class',align);
+						s = (this.poi[id][i].scale || 0.9);
+						this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale('+s+',-'+s+');');
 					}
-					this.poi[id][i]._circle.setAttribute('cx',x.toFixed(2)+'px');
-					this.poi[id][i]._circle.setAttribute('cy',y.toFixed(2)+'px');
-					this.poi[id][i]._txt.setAttribute('class',align);
-					this.poi[id][i]._txt.setAttribute('x',(x.toFixed(2))+'px');
-					this.poi[id][i]._txt.setAttribute('y',(y.toFixed(2))+'px');
-					this.poi[id][i]._txt2.setAttribute('x',(x.toFixed(2))+'px');
-					this.poi[id][i]._txt2.setAttribute('y',(y.toFixed(2))+'px');
-					this.poi[id][i]._txt2.setAttribute('class',align);
-					s = (this.poi[id][i].scale || 0.9);
-					this.poi[id][i]._el.setAttribute('style','transform-origin:'+x.toFixed(2)+'px '+(y+2.5).toFixed(2)+'px;transform: translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px) scale('+s+',-'+s+');');
 				}
 			}
 
