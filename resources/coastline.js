@@ -161,7 +161,8 @@
 					for(c = 0; c < d[0].length; c++){
 						k = d[0][c];
 						v = parseFloat(d[r][c]);
-						this.poi[p][l][k] = (v==d[r][c] ? v : d[r][c]);
+						// Compare if the string-representation of the number equals the original string
+						this.poi[p][l][k] = (v+''==d[r][c] ? v : d[r][c]);
 						if(k=="segments"){
 							this.poi[p][l][k] = (this.poi[p][l][k]+'').split(/;/);
 						}
@@ -512,6 +513,7 @@
 				// Add points of interest
 				for(i = 0; i < this.poi[id].length; i++){
 					p = getXY(this.poi[id][i].lat,this.poi[id][i].lon);
+					if(!this.poi[id][i]._p) console.error('No point made for '+id+','+i+'. That probably means no nearest segment was found.',this.poi[id][i]);
 					x = this.poi[id][i]._p.x;
 					y = this.poi[id][i]._p.y - this.opt.y.padding/2 - fs/2;
 					dx = p.x + this.xoff - x;
